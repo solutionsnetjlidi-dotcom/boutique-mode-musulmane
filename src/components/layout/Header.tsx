@@ -17,7 +17,6 @@ interface NavItem {
   sort_order: number
 }
 
-/* ===== Mode sombre (tout inclus ici) ===== */
 function useDarkMode() {
   const [dark, setDark] = useState<boolean>(() => {
     try { return localStorage.getItem('boutique:dark') === '1' } catch { return false }
@@ -86,27 +85,25 @@ export default function Header() {
       )}
 
       <div className="border-b border-border bg-background/90 backdrop-blur">
-        <div className="container flex items-center justify-between gap-3 py-4">
+        <div className="container flex items-center justify-between gap-3 py-3">
           <button className="rounded-full p-2 hover:bg-accent md:hidden" onClick={() => setMobileOpen(true)} aria-label="Menu">
             <Menu className="h-5 w-5" aria-hidden />
           </button>
 
-          {/* ===== LOGO + NOM DE MARQUE ===== */}
-          <Link to="/" className="flex items-center gap-2.5">
+          {/* ===== LOGO AGRANDI + CHIC ===== */}
+          <Link to="/" className="group flex items-center gap-3">
             {logoUrl && (
               <img
                 src={logoUrl}
                 alt={brand}
-                className="h-10 w-10 rounded-full object-cover shadow-md ring-1 ring-primary/30"
+                className="h-14 w-14 rounded-full object-cover shadow-lg ring-2 ring-primary/50 transition duration-500 group-hover:scale-110 group-hover:ring-primary md:h-16 md:w-16"
               />
             )}
-            <span className="font-display text-2xl tracking-[0.25em]">{brand}</span>
+            <span className="font-display text-2xl tracking-[0.3em] md:text-3xl">{brand}</span>
           </Link>
 
           <div className="flex items-center gap-1">
-            {/* 🔍 Recherche intelligente */}
             <SmartSearch />
-            {/* 🌙 Mode sombre */}
             <DarkToggle />
             <button onClick={nextLang} className="flex items-center gap-1 rounded-full p-2 transition hover:bg-accent" aria-label="Changer de langue">
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -156,7 +153,7 @@ export default function Header() {
           <div className="h-full w-72 bg-card p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="mb-6 flex items-center justify-between">
               <span className="flex items-center gap-2">
-                {logoUrl && <img src={logoUrl} alt={brand} className="h-8 w-8 rounded-full object-cover" />}
+                {logoUrl && <img src={logoUrl} alt={brand} className="h-10 w-10 rounded-full object-cover ring-2 ring-primary/40" />}
                 <span className="font-display text-xl">{brand}</span>
               </span>
               <button onClick={() => setMobileOpen(false)} aria-label="Fermer"><X className="h-5 w-5" aria-hidden /></button>
