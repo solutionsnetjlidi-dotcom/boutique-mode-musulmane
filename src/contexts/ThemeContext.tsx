@@ -184,3 +184,17 @@ export function useTheme(): ThemeContextValue {
   if (!ctx) throw new Error('useTheme doit être utilisé à l’intérieur de <ThemeProvider>')
   return ctx
 }
+export function useDarkMode() {
+  const [dark, setDarkState] = useState<boolean>(() => {
+    try { return localStorage.getItem('boutique:dark') === '1' } catch { return false }
+  })
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark)
+  }, [dark])
+  const toggle = () => {
+    const next = !dark
+    setDarkState(next)
+    try { localStorage.setItem('boutique:dark', next ? '1' : '0') } catch {}
+  }
+  return { dark, toggle }
+}
