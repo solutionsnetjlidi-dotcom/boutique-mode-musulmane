@@ -6,6 +6,7 @@ import { translate } from '@/lib/translations'
 
 const PREF_KEY = 'boutique:music-pref'
 const VOL_KEY = 'boutique:music-volume'
+const INTERACT_KEY = 'boutique:interacted'
 
 /* ================= Helpers YouTube ================= */
 function ytId(url: string): string | null {
@@ -37,7 +38,7 @@ function loadYouTubeAPI(): Promise<any> {
   return ytAPIPromise
 }
 
-/** Sections 63-64 : mini-player discret — MP3 (Storage) ou YouTube (défaut). */
+/** Sections 63-64 : musique par défaut — démarre au 1er geste, autoplay au retour. */
 export default function MusicPlayer() {
   const settings = useSiteSettings()
   const { lang } = useLanguage()
@@ -99,7 +100,7 @@ export default function MusicPlayer() {
     setPlayingBoth(false)
   }
 
-  /* Initialisation du player YouTube (invisible, loop) */
+  /* Player YouTube invisible + loop */
   useEffect(() => {
     if (!isFeatureOn || !isYouTube || !trackUrl) return
     let cancelled = false
@@ -135,16 +136,28 @@ export default function MusicPlayer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFeatureOn, isYouTube, trackUrl])
 
-  /* Autoplay si autorisé, sinon démarrage à la première interaction (section 64) */
+  /* Démarrage : 1er geste OU autoplay si déjà visité */
   useEffect(() => {
     if (!isFeatureOn || !trackUrl || userDisabled.current) return
-    const tryPlay = () => {
+
+    const tryStart = () => {
+      try { localStorage.setItem(INTERACT_KEY, '1') } catch { /* ignore */ }
       wantPlay.current = true
       if (!playingRef.current) play()
     }
-    tryPlay()
-    window.addEventListener('pointerdown', tryPlay, { once: true })
-    return () => window.removeEventListener('pointerdown', tryPlay)
+
+    let visited = false
+    try { visited = localStorage.getItem(INTERACT_KEY) === '1' } catch { /* ignore */ }
+    if (visited) tryStart()
+
+    window.addEventListener('pointerdown', tryStart, { once: true })
+    window.addEventListener('keydown', tryStart, { once: true })
+    window.addEventListener('touchend', tryStart, { once: true })
+    return () => {
+      window.removeEventListener('pointerdown', tryStart)
+      window.removeEventListener('keydown', tryStart)
+      window.removeEventListener('touchend', tryStart)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFeatureOn, trackUrl, isYouTube])
 
@@ -175,7 +188,6 @@ export default function MusicPlayer() {
 
   return (
     <>
-      {/* Player YouTube invisible (hors écran) */}
       {isYouTube && (
         <div
           key={trackUrl}
@@ -186,8 +198,16 @@ export default function MusicPlayer() {
         </div>
       )}
 
-      {/* Mode MP3 */}
       {!isYouTube && <audio ref={audioRef} src={trackUrl} loop preload="none" />}
+
+      <style>{`
+        @keyframes mpPulse {
+          0% { box-shadow: 0 0 0 0 hsl(var(--primary) / .55); }
+          70% { box-shadow: 0 0 0 16px hsl(var(--primary) / 0); }
+          100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
+        }
+        .mp-pulse { animation: mpPulse 1.8s ease-out infinite; }
+      `}</style>
 
       <div className="fixed bottom-20 left-4 z-50 md:bottom-6 md:left-6">
         {open && (
@@ -216,11 +236,11 @@ export default function MusicPlayer() {
               ? translate({ fr: 'Couper la musique', en: 'Turn off music', ar: 'إيقاف الموسيقى' }, lang)
               : translate({ fr: 'Activer la musique', en: 'Turn on music', ar: 'تشغيل الموسيقى' }, lang)
           }
-          title="🎵"
+          title={translate({ fr: 'Musique', en: 'Music', ar: 'موسيقى' }, lang)}
           className={
             playing
               ? 'rounded-full bg-primary p-3.5 text-primary-foreground shadow-lg transition hover:opacity-90'
-              : 'rounded-full border border-border bg-card p-3.5 shadow-lg transition hover:border-primary'
+              : 'mp-pulse rounded-full border border-primary/40 bg-card p-3.5 text-primary shadow-lg transition hover:border-primary'
           }
         >
           <Music className="h-5 w-5" aria-hidden />
