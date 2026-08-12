@@ -124,6 +124,21 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     void refreshThemes()
   }, [refreshThemes])
 
+  /* ===== TEMPS RÉEL : tout changement de thème en base = application instantanée ===== */
+  useEffect(() => {
+    const channel = supabase
+      .channel('themes-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'themes' },
+        () => void refreshThemes(),
+      )
+      .subscribe()
+    return () => {
+      void supabase.removeChannel(channel)
+    }
+  }, [refreshThemes])
+
   const setDefaultTheme = useCallback(async (theme: ThemeRow) => {
     const { error: unsetError } = await supabase
       .from('themes')

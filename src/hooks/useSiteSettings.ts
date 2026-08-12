@@ -8,7 +8,21 @@ function parse(data: { key: string; value: Json }[] | null): SettingsMap {
   return Object.fromEntries((data ?? []).map((r) => [r.key, r.value]))
 }
 
-/** Section 103 : les paramètres viennent TOUJOURS de Supabase, jamais en cache périmé. */
+let realtimeStarted = false
+function startSettingsRealtime() {
+  if (realtimeStarted) return
+  realtimeStarted = true
+  supabase
+    .channel('site-settings-realtime')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'site_settings' },
+      () => window.dispatchEvent(new Event('boutique:settings-changed')),
+    )
+    .subscribe()
+}
+
+/** Section 103 : paramètres toujours à jour — temps réel + retour d'onglet. */
 export function useSiteSettings(): SettingsMap | null {
   const [settings, setSettings] = useState<SettingsMap | null>(null)
 
@@ -26,12 +40,15 @@ export function useSiteSettings(): SettingsMap | null {
     }
 
     fetchSettings()
+    startSettingsRealtime()
 
-    // Se rafraîchit automatiquement quand on revient sur l'onglet (changement admin visible immédiatement)
-    window.addEventListener('focus', fetchSettings)
+    const onChanged = () => fetchSettings()
+    window.addEventListener('boutique:settings-changed', onChanged)
+    window.addEventListener('focus', onChanged)
     return () => {
       mounted = false
-      window.removeEventListener('focus', fetchSettings)
+      window.removeEventListener('boutique:settings-changed', onChanged)
+      window.removeEventListener('focus', onChanged)
     }
   }, [])
 
