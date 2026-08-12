@@ -17,7 +17,7 @@ interface NavItem {
   sort_order: number
 }
 
-/* ===== Mode sombre (tout inclus ici, rien d'autre à modifier) ===== */
+/* ===== Mode sombre (tout inclus ici) ===== */
 function useDarkMode() {
   const [dark, setDark] = useState<boolean>(() => {
     try { return localStorage.getItem('boutique:dark') === '1' } catch { return false }
@@ -73,6 +73,7 @@ export default function Header() {
   }, [])
 
   const brand = translate(settings?.brand_name as any, lang, 'ESTABRAK')
+  const logoUrl = settingString(settings, 'logo_url')
   const nextLang = () => setLang(lang === 'fr' ? 'en' : lang === 'en' ? 'ar' : 'fr')
   const whatsappHref = whatsappNumber ? `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}` : null
 
@@ -90,7 +91,17 @@ export default function Header() {
             <Menu className="h-5 w-5" aria-hidden />
           </button>
 
-          <Link to="/" className="font-display text-2xl tracking-[0.25em]">{brand}</Link>
+          {/* ===== LOGO + NOM DE MARQUE ===== */}
+          <Link to="/" className="flex items-center gap-2.5">
+            {logoUrl && (
+              <img
+                src={logoUrl}
+                alt={brand}
+                className="h-10 w-10 rounded-full object-cover shadow-md ring-1 ring-primary/30"
+              />
+            )}
+            <span className="font-display text-2xl tracking-[0.25em]">{brand}</span>
+          </Link>
 
           <div className="flex items-center gap-1">
             {/* 🔍 Recherche intelligente */}
@@ -144,7 +155,10 @@ export default function Header() {
         <div className="fixed inset-0 z-[90] bg-black/40 md:hidden" onClick={() => setMobileOpen(false)}>
           <div className="h-full w-72 bg-card p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="mb-6 flex items-center justify-between">
-              <span className="font-display text-xl">{brand}</span>
+              <span className="flex items-center gap-2">
+                {logoUrl && <img src={logoUrl} alt={brand} className="h-8 w-8 rounded-full object-cover" />}
+                <span className="font-display text-xl">{brand}</span>
+              </span>
               <button onClick={() => setMobileOpen(false)} aria-label="Fermer"><X className="h-5 w-5" aria-hidden /></button>
             </div>
             <nav className="flex flex-col gap-4 text-sm" aria-label="Navigation mobile">
