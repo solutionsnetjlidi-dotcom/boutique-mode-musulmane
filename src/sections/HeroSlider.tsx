@@ -6,6 +6,8 @@ import { useSiteSettings, settingString } from '@/hooks/useSiteSettings'
 import { translate } from '@/lib/translations'
 import { cn } from '@/lib/utils'
 
+const GOLD = '#D4AF37'
+
 interface HeroSlide {
   id: string
   title_translations: any
@@ -24,56 +26,17 @@ interface FlowProduct {
   main_image_url: string | null
 }
 
-/* ===== Carte IMAGE + NOM (sans prix) ===== */
-function FlowCard({ p, lang }: { p: FlowProduct; lang: string }) {
-  return (
-    <Link
-      to={`/product/${p.slug}`}
-      className="flex w-44 shrink-0 items-center gap-3 rounded-2xl border border-border bg-card px-3 py-2.5 shadow-md transition hover:shadow-xl"
-    >
-      {p.main_image_url && (
-        <img src={p.main_image_url} alt="" className="h-16 w-14 rounded-xl object-cover" loading="lazy" />
-      )}
-      <p className="min-w-0 flex-1 truncate text-sm font-medium">
-        {translate(p.name_translations, lang)}
-      </p>
-    </Link>
-  )
-}
-
-/* ===== Piste inclinée avec défilement infini ===== */
-function Lane({
-  top, angle, reverse, duration, products, lang,
-}: {
-  top: string
-  angle: number
-  reverse?: boolean
-  duration: number
-  products: FlowProduct[]
-  lang: string
-}) {
-  if (products.length === 0) return null
-  const items = [...products, ...products]
-  return (
-    <div
-      className="lane-mask absolute -inset-x-[12%]"
-      style={{ top, transform: `rotate(${angle}deg)` }}
-    >
-      <div
-        className={cn('lane-track flex gap-4 py-2', reverse && 'lane-reverse')}
-        style={{ animationDuration: `${duration}s` }}
-      >
-        {items.map((p, i) => (
-          <FlowCard key={`${p.id}-${i}`} p={p} lang={lang} />
-        ))}
-      </div>
-    </div>
-  )
-}
+/* Trajectoires de la fontaine (dx, dy en px depuis le centre) */
+const VECTORS = [
+  { dx: -430, dy: -140 }, { dx: -380, dy: -250 }, { dx: -280, dy: -330 }, { dx: -150, dy: -380 },
+  { dx: 0, dy: -400 }, { dx: 150, dy: -380 }, { dx: 280, dy: -330 }, { dx: 380, dy: -250 },
+  { dx: 430, dy: -140 }, { dx: -470, dy: -20 }, { dx: 470, dy: -20 }, { dx: -400, dy: 90 },
+  { dx: 400, dy: 90 }, { dx: -220, dy: -200 }, { dx: 220, dy: -200 }, { dx: 0, dy: -260 },
+]
 
 /**
- * Hero « flux de produits » : 3 pistes convergentes + logo-hub qui zoome
- * périodiquement + faisceau + titres CMS en boucle (section 12).
+ * Hero « Fontaine Dorée » : grand logo qui zoome + produits qui jaillissent
+ * du centre avec étincelles d'or + titres CMS en boucle (section 12).
  */
 export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
   const { lang } = useLanguage()
@@ -91,7 +54,7 @@ export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
       .select('id, slug, name_translations, main_image_url')
       .eq('is_active', true)
       .order('sold_count', { ascending: false })
-      .limit(18)
+      .limit(16)
       .then(({ data }) => setProducts((data ?? []) as FlowProduct[]))
   }, [])
 
@@ -102,40 +65,71 @@ export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
   }, [visible.length])
 
   const current = visible[index] ?? visible[0]
-  const laneA = products.slice(0, 6)
-  const laneB = products.slice(6, 12)
-  const laneC = products.slice(12, 18)
 
   return (
-    <section className="relative h-[80vh] min-h-[600px] overflow-hidden" aria-roledescription="carousel">
+    <section className="relative h-[85vh] min-h-[640px] overflow-hidden" aria-roledescription="carousel">
       {/* Fond doux */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-accent/50 to-background" />
 
-      {/* ===== 3 PISTES DE PRODUITS ===== */}
-      <div className="lanes-pause absolute inset-0">
-        <Lane top="14%" angle={7} duration={38} products={laneA} lang={lang} />
-        <Lane top="40%" angle={0} reverse duration={30} products={laneB} lang={lang} />
-        <Lane top="66%" angle={-7} duration={44} products={laneC} lang={lang} />
+      {/* ===== ⛲ FONTAINE DE PRODUITS DORÉE ===== */}
+      <div className="pointer-events-none absolute inset-0 z-10 origin-center scale-[.62] sm:scale-90 md:scale-100">
+        {products.map((p, i) => {
+          const v = VECTORS[i % VECTORS.length]
+          return (
+            <div
+              key={p.id}
+              className="fountain-item"
+              style={{
+                '--dx': `${v.dx}px`,
+                '--dy': `${v.dy}px`,
+                animationDelay: `${(i * 0.65) % 6}s`,
+                animationDuration: `${5.5 + (i % 3) * 0.9}s`,
+              } as any}
+            >
+              <img
+                src={p.main_image_url ?? undefined}
+                alt=""
+                className="h-14 w-14 rounded-full object-cover ring-2 ring-[#D4AF37]/80 shadow-[0_0_22px_rgba(212,175,55,0.55)]"
+              />
+            </div>
+          )
+        })}
+        {/* Étincelles dorées */}
+        {Array.from({ length: 20 }).map((_, i) => {
+          const v = VECTORS[(i * 5) % VECTORS.length]
+          return (
+            <span
+              key={`spark-${i}`}
+              className="fountain-item block h-1.5 w-1.5 rounded-full bg-[#D4AF37] shadow-[0_0_12px_rgba(212,175,55,0.95)]"
+              style={{
+                '--dx': `${v.dx * 1.18}px`,
+                '--dy': `${v.dy * 1.18}px`,
+                animationDelay: `${(i * 0.33) % 5}s`,
+                animationDuration: `${4 + (i % 4)}s`,
+              } as any}
+            />
+          )
+        })}
       </div>
 
-      {/* ===== LOGO-HUB AVEC ZOOM PÉRIODIQUE ===== */}
+      {/* ===== GRAND LOGO + ZOOM AVANT ===== */}
       <div className="pointer-events-none absolute left-1/2 top-[40%] z-20 -translate-x-1/2 -translate-y-1/2">
-        <div className="hub-glow flex h-24 w-24 items-center justify-center rounded-[2rem] bg-primary shadow-2xl ring-4 ring-white/70">
+        <div className="hub-gold flex h-32 w-32 items-center justify-center rounded-[2.5rem] bg-primary shadow-2xl ring-4 ring-[#D4AF37]/70 md:h-36 md:w-36">
           <div className="hub-zoom flex h-full w-full items-center justify-center">
             {logoUrl ? (
-              <img src={logoUrl} alt={brand} className="h-16 w-16 rounded-2xl object-cover" />
+              <img src={logoUrl} alt={brand} className="h-24 w-24 rounded-3xl object-cover md:h-28 md:w-28" />
             ) : (
-              <span className="font-display text-3xl text-primary-foreground">{brand.charAt(0)}</span>
+              <span className="font-display text-5xl text-primary-foreground">{brand.charAt(0)}</span>
             )}
           </div>
         </div>
       </div>
 
-      {/* Faisceau dégradé */}
+      {/* Faisceau dégradé or → rose */}
       <div
-        className="pointer-events-none absolute left-1/2 top-[46%] z-10 h-[46%] w-[46rem] max-w-[92vw] -translate-x-1/2 opacity-90"
+        className="pointer-events-none absolute left-1/2 top-[47%] z-10 h-[45%] w-[46rem] max-w-[92vw] -translate-x-1/2 opacity-90"
         style={{
-          background: 'linear-gradient(to bottom, hsl(var(--primary) / .85), hsl(var(--primary) / .25) 70%, transparent)',
+          background: `linear-gradient(to bottom, ${GOLD}cc, hsl(var(--primary) / .5) 45%, transparent)`,
           clipPath: 'polygon(46% 0, 54% 0, 100% 100%, 0% 100%)',
           filter: 'blur(1px)',
         }}
@@ -168,7 +162,6 @@ export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
               </Link>
             )}
           </div>
-          {/* Points */}
           <div className="mt-6 flex justify-center gap-2">
             {visible.map((s, i) => (
               <button
@@ -186,24 +179,32 @@ export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
       )}
 
       <style>{`
-        .lane-track { width: max-content; animation: laneMove 36s linear infinite; }
-        .lane-reverse { animation-direction: reverse; }
-        @keyframes laneMove { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        .lane-mask {
-          -webkit-mask-image: linear-gradient(to right, transparent, black 18%, black 82%, transparent);
-          mask-image: linear-gradient(to right, transparent, black 18%, black 82%, transparent);
+        /* ===== Fontaine : jaillissement du centre vers l'extérieur ===== */
+        .fountain-item {
+          position: absolute;
+          left: 50%;
+          top: 40%;
+          opacity: 0;
+          transform: translate(-50%, -50%);
+          animation: fountain 6s cubic-bezier(.2, .6, .4, 1) infinite;
         }
-        .lanes-pause:hover .lane-track { animation-play-state: paused; }
-        @keyframes hubPulse {
-          0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / .5), 0 25px 60px -20px hsl(var(--primary) / .6); }
-          50% { box-shadow: 0 0 0 22px hsl(var(--primary) / 0), 0 25px 60px -20px hsl(var(--primary) / .6); }
+        @keyframes fountain {
+          0%   { transform: translate(-50%, -50%) translate(0, 0) scale(.15); opacity: 0; }
+          10%  { opacity: 1; }
+          70%  { opacity: .95; }
+          100% { transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(1); opacity: 0; }
         }
-        .hub-glow { animation: hubPulse 2.6s ease-out infinite; }
-        /* ===== ZOOM AVANT PÉRIODIQUE DU LOGO ===== */
+        /* ===== Halo doré du logo ===== */
+        @keyframes hubGold {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, .55), 0 25px 70px -20px hsl(var(--primary) / .65); }
+          50% { box-shadow: 0 0 0 26px rgba(212, 175, 55, 0), 0 25px 70px -20px hsl(var(--primary) / .65); }
+        }
+        .hub-gold { animation: hubGold 2.6s ease-out infinite; }
+        /* ===== Zoom avant périodique du logo ===== */
         @keyframes hubZoom {
           0%, 52%, 100% { transform: scale(1); }
-          62% { transform: scale(1.3); }
-          72% { transform: scale(1.15); }
+          62% { transform: scale(1.32); }
+          72% { transform: scale(1.14); }
           82% { transform: scale(1.26); }
         }
         .hub-zoom { animation: hubZoom 5s ease-in-out infinite; }
