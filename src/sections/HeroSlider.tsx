@@ -4,7 +4,6 @@ import { supabase } from '@/lib/supabase'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useSiteSettings, settingString } from '@/hooks/useSiteSettings'
 import { translate } from '@/lib/translations'
-import { formatPrice } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
 interface HeroSlide {
@@ -22,35 +21,22 @@ interface FlowProduct {
   id: string
   slug: string
   name_translations: any
-  base_price: number
   main_image_url: string | null
-  is_best_seller: boolean
-  is_new: boolean
 }
 
-/* ===== Carte produit qui défile ===== */
+/* ===== Carte IMAGE + NOM (sans prix) ===== */
 function FlowCard({ p, lang }: { p: FlowProduct; lang: string }) {
   return (
     <Link
       to={`/product/${p.slug}`}
-      className="flex w-60 shrink-0 items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 shadow-md transition hover:shadow-xl"
+      className="flex w-44 shrink-0 items-center gap-3 rounded-2xl border border-border bg-card px-3 py-2.5 shadow-md transition hover:shadow-xl"
     >
       {p.main_image_url && (
-        <img src={p.main_image_url} alt="" className="h-12 w-10 rounded-lg object-cover" loading="lazy" />
+        <img src={p.main_image_url} alt="" className="h-16 w-14 rounded-xl object-cover" loading="lazy" />
       )}
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">{translate(p.name_translations, lang)}</p>
-        <p className="text-xs text-muted-foreground">
-          <span className="font-semibold text-primary price-ltr">{formatPrice(p.base_price)}</span>
-        </p>
-      </div>
-      {(p.is_best_seller || p.is_new) && (
-        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-          {p.is_best_seller
-            ? translate({ fr: 'Bestseller', en: 'Bestseller', ar: 'الأكثر مبيعاً' }, lang)
-            : translate({ fr: 'Nouveau', en: 'New', ar: 'جديد' }, lang)}
-        </span>
-      )}
+      <p className="min-w-0 flex-1 truncate text-sm font-medium">
+        {translate(p.name_translations, lang)}
+      </p>
     </Link>
   )
 }
@@ -86,8 +72,8 @@ function Lane({
 }
 
 /**
- * Hero « flux de produits » : 3 pistes convergentes + logo-hub + faisceau,
- * titres CMS en boucle (section 12).
+ * Hero « flux de produits » : 3 pistes convergentes + logo-hub qui zoome
+ * périodiquement + faisceau + titres CMS en boucle (section 12).
  */
 export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
   const { lang } = useLanguage()
@@ -102,7 +88,7 @@ export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
   useEffect(() => {
     supabase
       .from('products')
-      .select('id, slug, name_translations, base_price, main_image_url, is_best_seller, is_new')
+      .select('id, slug, name_translations, main_image_url')
       .eq('is_active', true)
       .order('sold_count', { ascending: false })
       .limit(18)
@@ -132,16 +118,20 @@ export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
         <Lane top="66%" angle={-7} duration={44} products={laneC} lang={lang} />
       </div>
 
-      {/* ===== LOGO-HUB + FAISCEAU ===== */}
+      {/* ===== LOGO-HUB AVEC ZOOM PÉRIODIQUE ===== */}
       <div className="pointer-events-none absolute left-1/2 top-[40%] z-20 -translate-x-1/2 -translate-y-1/2">
         <div className="hub-glow flex h-24 w-24 items-center justify-center rounded-[2rem] bg-primary shadow-2xl ring-4 ring-white/70">
-          {logoUrl ? (
-            <img src={logoUrl} alt={brand} className="h-16 w-16 rounded-2xl object-cover" />
-          ) : (
-            <span className="font-display text-3xl text-primary-foreground">{brand.charAt(0)}</span>
-          )}
+          <div className="hub-zoom flex h-full w-full items-center justify-center">
+            {logoUrl ? (
+              <img src={logoUrl} alt={brand} className="h-16 w-16 rounded-2xl object-cover" />
+            ) : (
+              <span className="font-display text-3xl text-primary-foreground">{brand.charAt(0)}</span>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Faisceau dégradé */}
       <div
         className="pointer-events-none absolute left-1/2 top-[46%] z-10 h-[46%] w-[46rem] max-w-[92vw] -translate-x-1/2 opacity-90"
         style={{
@@ -209,6 +199,14 @@ export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
           50% { box-shadow: 0 0 0 22px hsl(var(--primary) / 0), 0 25px 60px -20px hsl(var(--primary) / .6); }
         }
         .hub-glow { animation: hubPulse 2.6s ease-out infinite; }
+        /* ===== ZOOM AVANT PÉRIODIQUE DU LOGO ===== */
+        @keyframes hubZoom {
+          0%, 52%, 100% { transform: scale(1); }
+          62% { transform: scale(1.3); }
+          72% { transform: scale(1.15); }
+          82% { transform: scale(1.26); }
+        }
+        .hub-zoom { animation: hubZoom 5s ease-in-out infinite; }
       `}</style>
     </section>
   )
