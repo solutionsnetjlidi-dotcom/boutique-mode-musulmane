@@ -4,7 +4,6 @@ import { ThemeProvider } from '@/contexts/ThemeContext'
 import { LanguageProvider } from '@/contexts/LanguageContext'
 import { CartProvider } from '@/contexts/CartContext'
 import type { UserRole } from '@/contexts/AuthContext'
-
 import ProtectedRoute from '@/components/admin/ProtectedRoute'
 import PublicLayout from '@/layouts/PublicLayout'
 import AdminLayout from '@/layouts/AdminLayout'
@@ -76,7 +75,9 @@ export default function App() {
               <Routes>
                 {/* ===== BOUTIQUE PUBLIQUE ===== */}
                 <Route element={<PublicLayout />}>
-                  <Route path="/" element={<Home />} />
+                  {/* ✅ MODIFICATION : La page d'accueil redirige directement vers /shop */}
+                  <Route path="/" element={<Navigate to="/shop" replace />} />
+                  
                   <Route path="/shop" element={<Shop />} />
                   <Route path="/category/:slug" element={<Category />} />
                   <Route path="/collection/:slug" element={<CollectionPage />} />

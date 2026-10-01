@@ -20,7 +20,7 @@ class ErrorBoundary extends React.Component<
     if (this.state.error) {
       return (
         <div style={{ padding: 24, fontFamily: 'monospace', whiteSpace: 'pre-wrap', color: '#b00000', background: '#fff5f5', minHeight: '100vh' }}>
-          <h2 style={{ fontSize: 18 }}>️ Erreur détectée — envoyez cette capture :</h2>
+          <h2 style={{ fontSize: 18 }}>⚠️ Erreur détectée — envoyez cette capture :</h2>
           <p style={{ fontWeight: 700 }}>{this.state.error.message}</p>
           <pre style={{ fontSize: 11 }}>{this.state.error.stack}</pre>
         </div>
