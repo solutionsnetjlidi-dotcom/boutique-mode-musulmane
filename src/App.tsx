@@ -10,6 +10,7 @@ import AdminLayout from '@/layouts/AdminLayout'
 import { Button } from '@/components/ui/button'
 
 /* ===== Pages publiques ===== */
+import Home from '@/pages/Home'
 import Shop from '@/pages/Shop'
 import Category from '@/pages/Category'
 import CollectionPage from '@/pages/Collection'
@@ -71,8 +72,7 @@ export default function App() {
             <CartProvider>
               <Routes>
                 <Route element={<PublicLayout />}>
-                  {/* ✅ REDIRECTION : la racine "/" redirige vers /shop */}
-                  <Route path="/" element={<Navigate to="/shop" replace />} />
+                  <Route path="/" element={<Home />} />
                   <Route path="/shop" element={<Shop />} />
                   <Route path="/category/:slug" element={<Category />} />
                   <Route path="/collection/:slug" element={<CollectionPage />} />
@@ -81,18 +81,18 @@ export default function App() {
                   <Route path="/cart" element={<CartPage />} />
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/confirmation" element={<OrderConfirmation />} />
-                  <Route path="/wishlist" element={<PlaceholderPage title="Ma Wishlist" phase="La wishlist fonctionne via le cœur sur chaque produit." />} />}
-                  <Route path="/account" element={<PlaceholderPage title="Espace Cliente" phase="Page compte cliente en extension." />} />}
-                  <Route path="/about" element={<AboutPage />} />}
-                  <Route path="/contact" element={<ContactPage />} />}
-                  <Route path="/faq" element={<FaqPage />} />}
-                  <Route path="/privacy" element={<LegalPage settingKey="legal_privacy" titleKey={{ fr: 'Politique de confidentialité', en: 'Privacy Policy', ar: 'سياسة الخصوصية' }} />} />}
-                  <Route path="/terms" element={<LegalPage settingKey="legal_terms" titleKey={{ fr: 'Conditions générales', en: 'Terms of Sale', ar: 'الشروط العامة' }} />} />}
-                  <Route path="/shipping" element={<LegalPage settingKey="legal_shipping" titleKey={{ fr: 'Livraison', en: 'Shipping', ar: 'التوصيل' }} />} />}
-                  <Route path="/returns" element={<LegalPage settingKey="legal_returns" titleKey={{ fr: 'Retours', en: 'Returns', ar: 'الإرجاع' }} />} />}
+                  <Route path="/wishlist" element={<PlaceholderPage title="Ma Wishlist" phase="La wishlist fonctionne via le cœur sur chaque produit." />} />
+                  <Route path="/account" element={<PlaceholderPage title="Espace Cliente" phase="Page compte cliente en extension." />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/faq" element={<FaqPage />} />
+                  <Route path="/privacy" element={<LegalPage settingKey="legal_privacy" titleKey={{ fr: 'Politique de confidentialité', en: 'Privacy Policy', ar: 'سياسة الخصوصية' }} />} />
+                  <Route path="/terms" element={<LegalPage settingKey="legal_terms" titleKey={{ fr: 'Conditions générales', en: 'Terms of Sale', ar: 'الشروط العامة' }} />} />
+                  <Route path="/shipping" element={<LegalPage settingKey="legal_shipping" titleKey={{ fr: 'Livraison', en: 'Shipping', ar: 'التوصيل' }} />} />
+                  <Route path="/returns" element={<LegalPage settingKey="legal_returns" titleKey={{ fr: 'Retours', en: 'Returns', ar: 'الإرجاع' }} />} />
                 </Route>
 
-                <Route path="/admin/login" element={<AdminLogin />} />}
+                <Route path="/admin/login" element={<AdminLogin />} />
                 <Route
                   path="/admin"
                   element={
@@ -101,32 +101,32 @@ export default function App() {
                     </ProtectedRoute>
                   }
                 >
-                  <Route index element={<AdminDashboard />} />}
-                  <Route path="products" element={<AdminProducts />} />}
-                  <Route path="products/new" element={<AdminProductForm />} />}
-                  <Route path="products/:id" element={<AdminProductForm />} />}
-                  <Route path="categories" element={<AdminCategories />} />}
-                  <Route path="collections" element={<AdminCollections />} />}
-                  <Route path="stock" element={<AdminStock />} />}
-                  <Route path="orders" element={<AdminOrders />} />}
-                  <Route path="orders/:id" element={<AdminOrderDetailPage />} />}
-                  <Route path="customers" element={<AdminCustomers />} />}
-                  <Route path="reviews" element={<AdminReviews />} />}
-                  <Route path="cms" element={<AdminCms />} />}
-                  <Route path="faq" element={<AdminFaq />} />}
-                  <Route path="themes" element={<AdminThemes />} />}
-                  <Route path="languages" element={<AdminLanguages />} />}
-                  <Route path="media" element={<AdminMedia />} />}
-                  <Route path="shipping" element={<AdminShipping />} />}
-                  <Route path="promotions" element={<AdminPromotions />} />}
-                  <Route path="coupons" element={<AdminCoupons />} />}
-                  <Route path="music" element={<AdminMusic />} />}
-                  <Route path="seo" element={<AdminSeo />} />}
-                  <Route path="settings" element={<AdminSettings />} />}
-                  <Route path="whatsapp" element={<AdminWhatsApp />} />}
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="products" element={<AdminProducts />} />
+                  <Route path="products/new" element={<AdminProductForm />} />
+                  <Route path="products/:id" element={<AdminProductForm />} />
+                  <Route path="categories" element={<AdminCategories />} />
+                  <Route path="collections" element={<AdminCollections />} />
+                  <Route path="stock" element={<AdminStock />} />
+                  <Route path="orders" element={<AdminOrders />} />
+                  <Route path="orders/:id" element={<AdminOrderDetailPage />} />
+                  <Route path="customers" element={<AdminCustomers />} />
+                  <Route path="reviews" element={<AdminReviews />} />
+                  <Route path="cms" element={<AdminCms />} />
+                  <Route path="faq" element={<AdminFaq />} />
+                  <Route path="themes" element={<AdminThemes />} />
+                  <Route path="languages" element={<AdminLanguages />} />
+                  <Route path="media" element={<AdminMedia />} />
+                  <Route path="shipping" element={<AdminShipping />} />
+                  <Route path="promotions" element={<AdminPromotions />} />
+                  <Route path="coupons" element={<AdminCoupons />} />
+                  <Route path="music" element={<AdminMusic />} />
+                  <Route path="seo" element={<AdminSeo />} />
+                  <Route path="settings" element={<AdminSettings />} />
+                  <Route path="whatsapp" element={<AdminWhatsApp />} />
                 </Route>
 
-                <Route path="*" element={<Navigate to="/" replace />} />}
+                <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </CartProvider>
           </LanguageProvider>
