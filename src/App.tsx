@@ -72,6 +72,7 @@ export default function App() {
             <CartProvider>
               <Routes>
                 <Route element={<PublicLayout />}>
+                  {/* La racine "/" affiche directement la page d'accueil */}
                   <Route path="/" element={<Home />} />
                   <Route path="/shop" element={<Shop />} />
                   <Route path="/category/:slug" element={<Category />} />
