@@ -75,7 +75,7 @@ export default function App() {
               <Routes>
                 {/* ===== BOUTIQUE PUBLIQUE ===== */}
                 <Route element={<PublicLayout />}>
-                  {/* ✅ MODIFICATION : La page d'accueil redirige directement vers /shop */}
+                  {/* ✅ REDIRECTION AUTOMATIQUE VERS /shop */}
                   <Route path="/" element={<Navigate to="/shop" replace />} />
                   
                   <Route path="/shop" element={<Shop />} />
